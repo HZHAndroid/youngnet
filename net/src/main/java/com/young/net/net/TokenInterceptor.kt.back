@@ -1,0 +1,267 @@
+package com.accentrix.module_ec.net_work.net_interceptor
+
+import android.text.TextUtils
+import com.accentrix.lib_bean.rq_bean.base.BaseResult
+import com.accentrix.lib_commonality.util.AppLogger
+import com.accentrix.lib_net_working.utils.DataParserUtil
+import com.accentrix.module_ec.BuildConfig
+import com.accentrix.module_ec.constants.api.ApiConstant
+import com.accentrix.module_ec.constants.api.ApiSysConstant
+import com.accentrix.module_ec.utils.ali_oss_update_pic_util.OSSConstant
+import com.accentrix.module_ec.utils.cache.TokenUtil
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okio.Buffer
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.nio.charset.Charset
+
+
+/**
+ * author  : young
+ * email   : 1104090872@qq.com
+ * date    : 2021/1/21 星期四 23:59
+ * version : 1.0
+ * desc    : token 拦截器
+ *
+ *  https://blog.csdn.net/freak_csh/article/details/95531202
+ * <p>
+ * 注意事项：
+ * <p>
+ * 1、该自定义拦截器，实现的方法中使用synchronized同步方法（处理同时发起多个异步请求的情况，一个登陆过期就是所有的都登陆过期，
+ * 在刷新token的时候要控制刷新token的接口获取到结果才能让下一个接口结果进入，这里不控制的话，就会导致，你虽然一个接口刷新了token，
+ * 但是其他接口去刷新的时候就会刷新失败，导致会退出登录）
+ * 2、刷新token要使用同步请求，不能使用异步请求
+ * 3、response.body().string()只能读取一次，这里我们要做处理，不能在刷新token的时候去读取了，如果读取了就会失败，剩下的都不会进行了。
+ * 4、刷新token接口返回的数据要更登录接口返回的数据一样
+ * 5、在登陆成功的时候，要记录一下token过期的时间，用于判断是否刷新了token
+ */
+class TokenInterceptor : Interceptor {
+
+    companion object {
+        /**
+         * token 的请求头的 key
+         */
+        const val KEY_TOKEN = "Authorization"
+
+        /**
+         * 需要过滤掉 token 的链接
+         */
+        val filterTokenUrlList = arrayOf(
+            ApiSysConstant.Login.API_LOGIN,
+            ApiSysConstant.Login.API_SYS_BINDTHIRDPARTYLOGINMSG,
+            ApiSysConstant.Sys.API_RENEWTOKEN
+        )
+    }
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        var request = chain.request()
+
+        val url = request.url.toString()
+        // 过滤掉融云那部分 api
+        if (isRoomIMUrl(url)) {
+            // 如果是融云那块的请求操作，直接放行
+            return try {
+                chain.proceed(request)
+            } catch (e: SocketTimeoutException) {
+                e.printStackTrace()
+                createNoNetResponse(chain, request)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                createNoNetResponse(chain, request)
+            }
+        }
+
+        // 添加请求头，也包含设置好缓存的 token 请求头
+        request = addHeader(request)
+
+        // 过滤掉不需要校验 token 过期的 url
+        if (filterNoneCheckTokenOverdue(url)) {
+            // 如果是登录、第三方登录的请求，则直接返回
+//            return try {
+//                chain.proceed(request)
+//            } catch (e: SocketTimeoutException) {
+//                e.printStackTrace()
+//                Response.Builder().build()
+//            }
+            return try {
+                chain.proceed(request)
+            } catch (e: SocketTimeoutException) {
+                e.printStackTrace()
+                createNoNetResponse(chain, request)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                createNoNetResponse(chain, request)
+            }
+
+        }
+
+        if (TokenUtil.isForceRefreshToken()) {
+            // 强制刷新 token
+            //resultJsonStr = "{\"status\":200,\"code\":119,\"message\":\"token 过期\"}";
+            // 刷新 token
+            if (TokenUtil.requestReviewToken() == TokenUtil.CODE_REFRESH_TOKEN_SUCCESS) {
+                request = addHeader(request)
+            }
+        }
+
+        try {
+            // 获取请求体
+            var response = chain.proceed(request)
+
+
+            // 获取请求的响应数据
+            val responseBody = response.body?.let { getResponseBody(it) }
+
+            if (isTokenExpired(responseBody)) {
+                // token 过期
+                // 刷新 token
+                if (TokenUtil.requestReviewToken() == TokenUtil.CODE_REFRESH_TOKEN_SUCCESS) {
+                    request = addHeader(request)
+                    request = addParam(request)
+                    response = chain.proceed(request)
+                }
+            }
+
+            return response
+        } catch (e: SocketTimeoutException) {
+            e.printStackTrace()
+            return createNoNetResponse(chain, request)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return createNoNetResponse(chain, request)
+        }
+    }
+
+    /**
+     * 添加请求头
+     * @param request 旧的请求
+     */
+    private fun addHeader(request: Request): Request {
+        // 从缓存中获取 token
+        val token = TokenUtil.getToken()
+
+        if (BuildConfig.DEBUG) {
+            AppLogger.e("young_token", "token: \n$token")
+        }
+
+        // 下面添加请求头，一定不可以使用 addHeader ， 需要使用 header
+        // addHeader : 是不断添加，到时候请求体会不断叠加，如果要避免，需要调用 removeHeader
+        // header : 如果 key 相同，则进行替换，不会出现 addHeader 的情况，
+        val builder: Request.Builder = request.newBuilder()
+            .header("user-agent", "Android-APP") // 设置 Hula 平台接口需要的 token
+            .header(KEY_TOKEN, token)
+
+        return builder.build()
+    }
+
+
+    /**
+     * 过滤不用校验 token 过期的 url
+     *
+     * @param url 需要校验的 url
+     * @return true: 放行 false：需要校验 token 过期
+     */
+    private fun filterNoneCheckTokenOverdue(url: String): Boolean {
+        for (tempUrl in filterTokenUrlList) {
+            if (url.contains(tempUrl)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * 是否是容云图片等 url
+     * @return true：融云图片等 url false：其他 api
+     */
+    private fun isRoomIMUrl(url: String): Boolean {
+        return url.startsWith(OSSConstant.getOssPicUrlPrefix())
+    }
+
+    /**
+     * response.body().string()只能读取一次问题处理
+     *
+     * @param responseBody 请求响应体
+     * @return
+     * @throws IOException
+     */
+    @Throws(IOException::class)
+    private fun getResponseBody(responseBody: ResponseBody): String? {
+        // 读取请求下来最原始的数据
+        val source = responseBody.source()
+        // 获取全部body的数据
+        source.request(Long.MAX_VALUE)
+        val buffer: Buffer = source.buffer
+        // 在读取缓存去之前clone数据，解决response.body().string()只能读取一次的问题
+        return buffer.clone().readString(Charset.forName("UTF-8"))
+    }
+
+    /**
+     * 校验 token 是否过期
+     *
+     * @param resultJsonStr 请求返回的内容
+     * @return
+     */
+    @Synchronized
+    private fun isTokenExpired(resultJsonStr: String?): Boolean {
+        // resultJsonStr = "{\"status\":200,\"code\":119,\"message\":\"token 过期\"}";
+        if (TextUtils.isEmpty(resultJsonStr)) {
+            return false
+        }
+        val baseResult: BaseResult = DataParserUtil.parseJson(resultJsonStr, BaseResult::class.java)
+            ?: return false
+        // token 登录过期
+        return baseResult.code == ApiConstant.Code.CODE_TOKEN_EXPIRED
+    }
+
+    /**
+     * 添加公共参数
+     *
+     * @param oldRequest
+     * @return
+     */
+    private fun addParam(oldRequest: Request): Request {
+        return oldRequest.newBuilder()
+            .method(oldRequest.method, oldRequest.body)
+            .url(oldRequest.url)
+            .build()
+    }
+
+    /**
+     * 创建一个没有网络的响应体
+     * @param chain 拦截器链
+     * @param request 请求对象
+     */
+    private fun createNoNetResponse(
+        chain: Interceptor.Chain,
+        request: Request
+    ): Response {
+        val map = mutableMapOf<String, Any>()
+        map["status"] = -198
+        map["code"] = -198
+        map["message"] = "网络异常"
+
+        val body: ResponseBody =
+            ResponseBody.create("text/plain".toMediaType(), DataParserUtil.toJson(map))
+
+//        return createResponse(chain.proceed(request), DataParserUtil.toJson(map))
+        return Response.Builder()
+            .code(1010)
+            .request(request)
+            .protocol(Protocol.HTTP_1_1)
+            .message(map["message"].toString())
+            .body(body).build()
+    }
+
+    /**
+     * 创建一个自定义内容的 Response
+     * @param response 旧的 Response
+     * @param content 内容（例如：json字符串）
+     * @return 自定义内容的 Response
+     */
+    private fun createResponse(response: Response, content: String): Response {
+        val body: ResponseBody = ResponseBody.create("text/plain".toMediaType(), content)
+        return response.newBuilder().body(body).build()
+    }
+}
