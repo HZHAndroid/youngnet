@@ -71,11 +71,12 @@ class BodyClientCreator<T> : BaseClientCreator<T, BodyClientCreator<T>>,
      */
     fun setBody(mediaType: MediaType, content: String): BodyClientCreator<T> {
 //        RequestBody.create(mediaType, content)
+        // 这个转换，需要依赖 com.squareup.okhttp3:logging-interceptor
         this.body = content.toRequestBody(mediaType)
         return this
     }
 
     override fun build(): RestBodyClient<T> {
-        return RestBodyClientImpl(mUrl, mResultType, mHeaderMap, mParamMap, body)
+        return RestBodyClientImpl(mUrl, mResultType, mHeaderMap, mParamMap, body,mGetCall)
     }
 }

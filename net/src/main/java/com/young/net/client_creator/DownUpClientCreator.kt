@@ -33,6 +33,6 @@ class DownUpClientCreator<T> : BaseClientCreator<T, DownUpClientCreator<T>>,
     constructor(url: String, resultType: Class<T>) : super(url, resultType)
 
     override fun build(): DownUpClient<T> {
-        return DownUpClientImpl(mUrl, mResultType, mHeaderMap, mParamMap)
+        return DownUpClientImpl(mUrl, mResultType, mHeaderMap, mParamMap,mGetCall)
     }
 }

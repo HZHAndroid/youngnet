@@ -9,6 +9,8 @@ import com.young.net.callback.IDoNetConfig
 import com.young.net.constant.ErrorCode
 import com.young.net.exception.ApiException
 import com.young.net.init.NetConfig
+import com.young.youngnet.interceptor.TestTokenInterceptor
+import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * @author:  Young
@@ -70,20 +72,32 @@ class MyApplication : Application() {
 
                 override fun onConfig(config: NetConfig) {
                     // 普通 api 请求的配置
-//                    config
-//                        .addInterceptor(TestTokenInterceptor())
-//                        .addNetworkInterceptor(
-//                            HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
-//                                override fun log(message: String) {
-//                                    Log.e("shenlong", "message = $message")
-//                                }
-//                            }).setLevel(HttpLoggingInterceptor.Level.BODY)
-//                        )
+                    config
+                        .addInterceptor(TestTokenInterceptor())
+                        .addNetworkInterceptor(
+                            HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
+                                override fun log(message: String) {
+                                    Log.e("shenlong", "message = $message")
+                                }
+                            }).setLevel(HttpLoggingInterceptor.Level.BODY)
+                        )
                 }
 
             }, object : IDoNetConfig {
                 override fun onConfig(config: NetConfig) {
                     // 上传下载 api 请求的配置
+                    // RequestBody writeTo 执行两次问题（722） https://www.jianshu.com/p/705b1c461040
+                    // 从BODY改成HEADERS解决了重复调用问题
+
+                    // okhttp添加日志拦截器，上传文件RequestBody.writeTo调用两次
+                    // https://blog.csdn.net/u013626215/article/details/107014153
+                    config.addNetworkInterceptor(
+                        HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
+                            override fun log(message: String) {
+                                Log.e("shenlong", "message = $message")
+                            }
+                        }).setLevel(HttpLoggingInterceptor.Level.HEADERS)
+                    )
                 }
             })
     }

@@ -1,6 +1,7 @@
 package com.young.net.client.impl
 
 import com.young.net.callback.ICallback
+import com.young.net.callback.IGetCall
 import com.young.net.client.RestBodyClient
 import com.young.net.client.base.BaseClient
 import okhttp3.RequestBody
@@ -36,8 +37,9 @@ class RestBodyClientImpl<T>(
     // 跟 body 互斥
     paramMap: MutableMap<String, Any>?,
     // 跟 paramMap 互斥（优先级会高于 paramMap）
-    val body: RequestBody?
-) : BaseClient<T>(url, resultType, headerMap, paramMap), RestBodyClient<T> {
+    val body: RequestBody?,
+    callCallback: IGetCall?
+) : BaseClient<T>(url, resultType, headerMap, paramMap, callCallback), RestBodyClient<T> {
 
 //    constructor(
 //        url: String,

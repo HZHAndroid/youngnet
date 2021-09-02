@@ -34,11 +34,14 @@ import java.lang.reflect.Type
 class RetrofitSyncCallback<T>(
 //    private val resultType: Class<T>,
     private val resultType: Type,
-    private val call: Call<String>
+    private val call: Call<String>,
+    // 获取 Call<?> 对象的回调
+    private val callCallback: IGetCall?
 ) {
 
     @Throws(ApiException::class)
     fun execute(): T? {
+        callCallback?.onGet(call)
         try {
             val response = call.execute()
 

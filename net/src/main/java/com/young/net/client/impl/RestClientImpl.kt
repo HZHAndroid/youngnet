@@ -1,6 +1,7 @@
 package com.young.net.client.impl
 
 import com.young.net.callback.ICallback
+import com.young.net.callback.IGetCall
 import com.young.net.callback.RetrofitCallback
 import com.young.net.callback.RetrofitSyncCallback
 import com.young.net.client.RestClient
@@ -37,8 +38,9 @@ class RestClientImpl<T>(
     url: String,
     resultType: Type,
     headerMap: Map<String, String>,
-    paramMap: MutableMap<String, Any>
-) : BaseClient<T>(url, resultType, headerMap, paramMap), RestClient<T> {
+    paramMap: MutableMap<String, Any>,
+    callCallback: IGetCall?
+) : BaseClient<T>(url, resultType, headerMap, paramMap, callCallback), RestClient<T> {
 
 
     private fun getGetCall(): Call<String> {
@@ -58,11 +60,11 @@ class RestClientImpl<T>(
     }
 
     override fun get(callback: ICallback<T>) {
-        getGetCall().enqueue(RetrofitCallback(callback, resultType))
+        getGetCall().enqueue(RetrofitCallback(callback, resultType,callCallback))
     }
 
     override fun get(): T? {
-        return RetrofitSyncCallback<T>(resultType, getGetCall()).execute()
+        return RetrofitSyncCallback<T>(resultType, getGetCall(),callCallback).execute()
     }
 
     override fun delete(callback: ICallback<T>) {

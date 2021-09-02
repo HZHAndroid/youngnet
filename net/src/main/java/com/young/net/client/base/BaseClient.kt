@@ -1,6 +1,7 @@
 package com.young.net.client.base
 
 import com.young.net.callback.ICallback
+import com.young.net.callback.IGetCall
 import com.young.net.callback.RetrofitCallback
 import com.young.net.callback.RetrofitSyncCallback
 import com.young.net.service.Api
@@ -40,7 +41,9 @@ open class BaseClient<T>(
     // 请求头
     protected val headerMap: Map<String, String>,
     // 请求参数
-    protected val paramMap: MutableMap<String, Any>?
+    protected val paramMap: MutableMap<String, Any>?,
+    // 获取 retrofit 的 Call<?> 的回调
+    protected val callCallback: IGetCall?
 ) {
 
 //    // 请求的解析类型
@@ -76,10 +79,10 @@ open class BaseClient<T>(
     protected fun getDownUpApi(): DownUpApi = ApiCreateUtil.createDownService(DownUpApi::class.java)
 
     protected fun execute(call: Call<String>, callback: ICallback<T>) {
-        call.enqueue(RetrofitCallback(callback, resultType))
+        call.enqueue(RetrofitCallback(callback, resultType,callCallback))
     }
 
     protected fun execute(call: Call<String>): T? {
-        return RetrofitSyncCallback<T>(resultType, call).execute()
+        return RetrofitSyncCallback<T>(resultType, call,callCallback).execute()
     }
 }

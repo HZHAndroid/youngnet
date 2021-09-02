@@ -33,7 +33,7 @@ class CommonClientCreator<T> :
     constructor(url: String, resultType: Class<T>) : super(url, resultType)
 
     override fun build(): RestClient<T> {
-        return RestClientImpl(mUrl, mResultType, mHeaderMap, mParamMap)
+        return RestClientImpl(mUrl, mResultType, mHeaderMap, mParamMap,mGetCall)
     }
 
 }

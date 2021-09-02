@@ -37,7 +37,9 @@ import java.lang.reflect.Type
 class RetrofitCallback<T>(
     private val callback: ICallback<T>,
 //    private val resultType: Class<T>
-    private val resultType: Type
+    private val resultType: Type,
+    // 获取 Call<?> 对象的回调
+    private val callCallback: IGetCall?
 ) : Callback<String> {
     // 消息类型 - 成功
     private val MESSAGE_TYPE_SUCCESS = 0x10
@@ -70,6 +72,7 @@ class RetrofitCallback<T>(
     private var mResult: T? = null
 
     override fun onResponse(call: Call<String>, response: Response<String>) {
+        callCallback?.onGet(call)
         mApiException = null
         mResult = null
         if (response.isSuccessful) {

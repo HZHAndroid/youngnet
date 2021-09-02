@@ -3,7 +3,6 @@ package com.young.net.client.impl
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import com.young.net.callback.ICallback
 import com.young.net.body.ProgressRequestBody
 import com.young.net.callback.*
 import com.young.net.client.DownUpClient
@@ -44,8 +43,9 @@ class DownUpClientImpl<T>(
     url: String,
     resultType: Type,
     headerMap: Map<String, String>,
-    paramMap: MutableMap<String, Any>?
-) : BaseClient<T>(url, resultType, headerMap, paramMap), DownUpClient<T> {
+    paramMap: MutableMap<String, Any>?,
+    callCallback: IGetCall?
+) : BaseClient<T>(url, resultType, headerMap, paramMap, callCallback), DownUpClient<T> {
 
     private fun getDownloadCall(): Call<ResponseBody> {
         return getDownloadCall(url)
@@ -59,7 +59,7 @@ class DownUpClientImpl<T>(
     override fun download(file: File, callBack: IDownloadCallback) {
         val downloadHandle = getDownloadHandle(1, callBack)
         getDownloadCall()
-            .enqueue(RetrofitDownCallback(url, file, downloadHandle))
+            .enqueue(RetrofitDownCallback(url, file, downloadHandle,callCallback))
     }
 
 
@@ -267,7 +267,7 @@ class DownUpClientImpl<T>(
      */
     private fun downloadSync(url: String, file: File, downloadHandle: Handler) {
         var call: Call<ResponseBody>? = null
-        val retrofitDownCallback = RetrofitDownCallback(url, file, downloadHandle)
+        val retrofitDownCallback = RetrofitDownCallback(url, file, downloadHandle,callCallback)
         try {
             call = getDownloadCall(url)
             retrofitDownCallback.onResponse(call, call.execute())

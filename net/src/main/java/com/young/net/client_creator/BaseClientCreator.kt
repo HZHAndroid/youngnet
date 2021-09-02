@@ -1,6 +1,7 @@
 package com.young.net.client_creator
 
 import com.google.gson.reflect.TypeToken
+import com.young.net.callback.IGetCall
 import java.lang.reflect.Type
 
 /**
@@ -45,6 +46,9 @@ open class BaseClientCreator<T, C : BaseClientCreator<T, C>> {
         mutableMapOf()
     }
 
+    // 获取 Call<?> 对象回调
+    protected var mGetCall: IGetCall? = null
+
     constructor(url: String, resultType: TypeToken<T>) {
         mUrl = url
         mResultType = resultType.type
@@ -57,6 +61,14 @@ open class BaseClientCreator<T, C : BaseClientCreator<T, C>> {
 
     private fun self(): C {
         return this as C
+    }
+
+    /**
+     * 设置获取 Call 对象回调，方便外部进行关闭等操作
+     */
+    fun setGetCall(call: IGetCall): C {
+        mGetCall = call
+        return self()
     }
 
     /**

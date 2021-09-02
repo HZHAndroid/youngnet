@@ -43,7 +43,9 @@ class RetrofitDownCallback(
     private val downUrl: String,
     private val file: File,
     // 进度回调
-    private val handler: Handler
+    private val handler: Handler,
+    // 获取 Call<?> 对象的回调
+    private val callCallback: IGetCall?
 ) : Callback<ResponseBody> {
 
     companion object {
@@ -62,6 +64,7 @@ class RetrofitDownCallback(
     }
 
     override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+        callCallback?.onGet(call)
         if (response.isSuccessful) {
             val body = response.body()
             try {
