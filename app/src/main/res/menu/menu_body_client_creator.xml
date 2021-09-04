@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText">
+    <item
+        android:id="@+id/post"
+        android:title="post请求" />
+    <item
+        android:id="@+id/postSync"
+        android:title="post请求(同步)" />
+    <item
+        android:id="@+id/put"
+        android:title="put请求" />
+    <item
+        android:id="@+id/putSync"
+        android:title="put请求(同步)" />
+    <item
+        android:id="@+id/patch"
+        android:title="patch请求" />
+    <item
+        android:id="@+id/patchSync"
+        android:title="patch请求(同步)" />
+</menu>

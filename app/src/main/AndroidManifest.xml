@@ -21,6 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".demo.CommonClientCreatorActivity" />
+        <activity android:name=".demo.BodyClientCreatorActivity" />
+        <activity android:name=".demo.DownUpClientCreatorActivity" />
     </application>
 
 </manifest>

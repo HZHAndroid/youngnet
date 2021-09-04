@@ -1,32 +1,34 @@
 package com.young.youngnet
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.young.youngnet.databinding.ActivityMainBinding
+import com.young.youngnet.demo.BodyClientCreatorActivity
+import com.young.youngnet.demo.CommonClientCreatorActivity
+import com.young.youngnet.demo.DownUpClientCreatorActivity
 
 class MainActivity : AppCompatActivity() {
+
+    private val mBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(mBinding.root)
 
-//        YoungNetWorking.createBodyClientCreator("user/list", Any::class.java)
-//            .addParam("hello", "你好")
-//            .addHeader("token", "tokjskjdf")
-//            .addHeader("shenxian", "i am power")
-//            .setGetCall(object :IGetCall {
-//                override fun onGet(call: Call<*>) {
-//                    Log.e("shenlong","call call call ${call}")
-//                }
-//
-//            })
-//            .build()
-//            .post(object : ICallback<Any> {
-//                override fun onFailure(e: ApiException) {
-//                    Log.e("shenlong", "kk onFailure = $e")
-//                }
-//
-//                override fun onSuccess(data: Any?) {
-//                    Log.e("shenlong", "kk tset = " + data + " " + Thread.currentThread().name)
-//                }
-//            })
+        mBinding.button.setOnClickListener {
+            startActivity(Intent(this@MainActivity, CommonClientCreatorActivity::class.java))
+        }
+
+        mBinding.button2.setOnClickListener {
+            startActivity(Intent(this@MainActivity, BodyClientCreatorActivity::class.java))
+        }
+
+        mBinding.button3.setOnClickListener {
+            startActivity(Intent(this@MainActivity, DownUpClientCreatorActivity::class.java))
+        }
     }
 }
