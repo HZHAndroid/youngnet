@@ -1,6 +1,8 @@
 [![Version](https://jitpack.io/v/HZHAndroid/youngnet.svg)](https://jitpack.io/#FunnySaltyFish/CMaterialColors)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/HZHAndroid/youngnet/blob/main/LICENSE)
 
+[简书](https://www.jianshu.com/p/eb424bca97e4)
+
 ## 介绍
 ```
 **youngnet** 这个网络库，是基于 retofit 进行封装的。该框架支持 restful api 的请求。
@@ -218,7 +220,7 @@ NetInit.setBaseUrl(Constant.Host.HOST) // 设置基础的请求域名，需要�
 可以参考[这里](https://github.com/HZHAndroid/youngnet/blob/main/app/src/main/java/com/young/youngnet/interceptor/TestTokenInterceptor.kt)
 
 
-### 四、其他
+### 五、其他
 ```
 1、当前项目已经加入了混淆配置，不需要额外添加混淆配置；
 2、如果自己增加了 Retrofit 的请求方法，可以通过 ApiCreateUtil#create 或者 ApiCreateUtil#createDownService 去创建对应的 api 请求类；
