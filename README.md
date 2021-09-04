@@ -28,20 +28,19 @@
 ```
 
 ## Demo 运行效果图
-```
 ![screen_1.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/1.png)
-![screen_2.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/1.png)
-![screen_3.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/1.png)
-![screen_4.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/1.png)
-![screen_5.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/1.png)
-![screen_6.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/1.png)
-```
+![screen_2.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/2.png)
+![screen_3.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/3.png)
+![screen_4.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/4.png)
+![screen_5.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/5.png)
+![screen_6.png](https://github.com/HZHAndroid/youngnet/blob/main/demo-images/6.png)
 
 ## 使用
 ### 一、初始化
-```kotlin
 在你的 application 中的 onCreate 方法中调用下面的代码，进行初始化配置：
 可以参考[这里](https://github.com/HZHAndroid/youngnet/blob/main/app/src/main/java/com/young/youngnet/MyApplication.kt)
+
+```kotlin
 
  NetInit.setBaseUrl(Constant.Host.HOST) // 设置基础的请求域名，需要一 / 结尾
             .setCommonErrorCallback(object : ICommonErrorCallback {
@@ -101,9 +100,10 @@
 ```
 
 ### 二、代码调用
-```kotlin
 
 - 1、YoungNetWorking#createCommonClientCreator，具体的请求参考[这里](https://github.com/HZHAndroid/youngnet/blob/main/app/src/main/java/com/young/youngnet/demo/CommonClientCreatorActivity.kt)：
+
+```kotlin
 
     YoungNetWorking.createCommonClientCreator("user", Any::class.java)
             .addParam("userId", "${SystemClock.currentThreadTimeMillis()}")
@@ -126,9 +126,10 @@
                     hideLoading()
                 }
             })
+```
 
 - 2、YoungNetWorking#createBodyClientCreator，具体的请求参考[这里](https://github.com/HZHAndroid/youngnet/blob/main/app/src/main/java/com/young/youngnet/demo/BodyClientCreatorActivity.kt)：
-
+```kotlin
         val paramMap = mutableMapOf<String, Any>()
         paramMap["userId"] = "${SystemClock.currentThreadTimeMillis()}"
         paramMap["bookId"] = "${SystemClock.currentThreadTimeMillis()}"
@@ -157,8 +158,10 @@
                     hideLoading()
                 }
             })
+```
 
 - 3、YoungNetWorking#createDownUpClientCreator，具体的请求参考[这里](https://github.com/HZHAndroid/youngnet/blob/main/app/src/main/java/com/young/youngnet/demo/DownUpClientCreatorActivity.kt)：
+```kotlin
     下载：
         val file = File(cacheDir, "hello.jpg")
         YoungNetWorking.createDownUpClientCreator(
@@ -210,10 +213,10 @@ NetInit.setBaseUrl(Constant.Host.HOST) // 设置基础的请求域名，需要�
 ```
 
 ### 四、自定义token过期自动刷新拦截器
-```kotlin
+
 创建一个类继承 TokenInterceptor ，然后实现其中的抽象方法即可，
 可以参考[这里](https://github.com/HZHAndroid/youngnet/blob/main/app/src/main/java/com/young/youngnet/interceptor/TestTokenInterceptor.kt)
-```
+
 
 ### 四、其他
 ```
