@@ -10,6 +10,7 @@ import com.young.net.callback.ICommonErrorCallback
 import com.young.net.callback.IDoNetConfig
 import com.young.net.exception.ApiException
 import com.young.net.init.NetConfig
+import com.young.youngnet.constant.Constant
 import com.young.youngnet.interceptor.TestTokenInterceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -49,7 +50,7 @@ class MyApplication : Application() {
      * 初始化网络
      */
     private fun initNet() {
-        NetInit.setBaseUrl("http://rap2api.taobao.org/app/mock/290045/") // 设置基础的请求域名，需要一 / 结尾
+        NetInit.setBaseUrl(Constant.Host.HOST) // 设置基础的请求域名，需要一 / 结尾
             .setCommonErrorCallback(object : ICommonErrorCallback {
                 override fun onCall(e: ApiException) {
                     // 只要请求异常，都会调用当前方法

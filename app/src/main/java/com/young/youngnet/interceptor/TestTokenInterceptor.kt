@@ -1,8 +1,9 @@
 package com.young.youngnet.interceptor
 
-import android.util.Log
-import com.young.net.YoungNetWorking.createCommonClientCreator
+import android.os.SystemClock
+import com.young.net.YoungNetWorking
 import com.young.net.interceptor.net.TokenInterceptor
+import com.young.youngnet.constant.Constant
 
 /**
  * @author:  Young
@@ -28,48 +29,44 @@ import com.young.net.interceptor.net.TokenInterceptor
  */
 class TestTokenInterceptor : TokenInterceptor() {
     @Volatile
-    private  var mIsExpire = false
+    private var mIsExpire = true
 
     override fun getHeaderMap(): Map<String, String> {
-        val map = mutableMapOf<String,String>()
-        map["user-ann"] = "android"
-        Log.e("shenlong","getHeaderMap() = ${map}")
+        val map = mutableMapOf<String, String>()
+        map["power-man"] = "young"
         return map
     }
 
     override fun getTokenKeyValue(): Pair<String, String>? {
-        Log.e("shenlong","getTokenKeyValue() ")
-       return Pair("token","AADkdkdkdkkddddddd")
+        return Pair(
+            "token",
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhZG1pbiIsImV4cCI6MTYyNzUzOTUzMSwiaWF0IjoxNjI3NDUzMTMxfQ.XD-yOik8P5WoFSj6yPova9fbylKp9lnEy0i-S-KaWxQ"
+        )
     }
 
     override fun isNeedToken(url: String, method: String): Boolean {
-        if (url.startsWith("http://rap2api.taobao.org/app/mock/289099/user") && "GET" == method){
+        if (url.startsWith("${Constant.Host.HOST}refresh-token") && "GET" == method) {
             return false
         }
         return true
     }
 
     override fun onCheckTokenExpire(bodyStr: String): Boolean {
-
-        Log.e("shenlong","onCheckTokenExpire() ${mIsExpire} ")
         return mIsExpire
     }
 
     override fun onRefreshToken(): Pair<String, String>? {
-
-        var newToken = "onRefreshToken"
+        var newToken: String? = null
         try {
-            val obj = createCommonClientCreator("user", Any::class.java)
-                .addParam("hello", "送刷卡")
-                .addHeader("token", "guankd")
+            val map = YoungNetWorking.createCommonClientCreator("refresh-token", Map::class.java)
+                .addParam("userId", "${SystemClock.currentThreadTimeMillis()}")
                 .build()
                 .get()
-            newToken = "tianlongkjjdkjfkdjf"
+
+            newToken = map?.get("token")?.toString()
             mIsExpire = false
         } catch (e: Exception) {
-            Log.e("shenlong","onRefreshTokendddd = $e")
         }
-        Log.e("shenlong","onRefreshToken() ")
-        return Pair("token","${newToken}")
+        return Pair("token", "${newToken}")
     }
 }
