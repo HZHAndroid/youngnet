@@ -1,4 +1,4 @@
-[![Version](https://jitpack.io/v/HZHAndroid/youngnet.svg)](https://jitpack.io/#FunnySaltyFish/CMaterialColors)
+[![Version](https://jitpack.io/v/HZHAndroid/youngnet.svg)](https://jitpack.io/#HZHAndroid/youngnet/1.0.1)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/HZHAndroid/youngnet/blob/main/LICENSE)
 
 [简书](https://www.jianshu.com/p/eb424bca97e4)
@@ -27,6 +27,34 @@
 支持上传/下载的子进度回调、总进度回调
 同步和异步调用都支持
 
+```
+
+## 添加依赖
+1、在你项目根目录的 build.gradle 中添加：
+```
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+或者在 settings.gradle 中添加：
+```
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+2、引入依赖
+```
+	dependencies {
+	        implementation 'com.github.HZHAndroid:youngnet:1.0.1'
+	}
 ```
 
 ## Demo 运行效果图
